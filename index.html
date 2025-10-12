@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Image Verification App</title>
+        <!-- Load Tailwind CSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Custom Tailwind Configuration -->
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ["Inter", "sans-serif"],
+                        },
+                        colors: {
+                            "primary-blue": "#1D4ED8", // Darker Blue for depth
+                            "success-green": "#10B981",
+                            "failure-red": "#EF4444",
+                            "light-gray": "#F9FAFB",
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            /* Ensures the app takes full viewport height on mobile */
+            html,
+            body {
+                height: 100%;
+            }
+            .container-wrapper {
+                min-height: 100vh;
+            }
+            /* Hide the default file input visually */
+            .hidden-file-input {
+                width: 0.1px;
+                height: 0.1px;
+                opacity: 0;
+                overflow: hidden;
+                position: absolute;
+                z-index: -1;
+            }
+        </style>
+    </head>
+    <body class="bg-light-gray font-sans">
+        <div
+            id="app"
+            class="container-wrapper flex flex-col items-center justify-start p-4 md:p-8"
+        >
+            <!-- Main Card Container -->
+            <div
+                class="w-full max-w-lg bg-white shadow-2xl rounded-xl p-6 md:p-8 mt-10"
+            >
+                <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
+                    Photo Verifier
+                </h1>
+
+                <!-- Image Preview Area -->
+                <div
+                    id="image-preview-container"
+                    class="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 overflow-hidden mb-6 transition duration-300 ease-in-out"
+                >
+                    <img
+                        id="image-preview"
+                        src=""
+                        alt="Photo Preview"
+                        class="hidden max-h-full w-auto object-contain"
+                    />
+                    <p
+                        id="placeholder-text"
+                        class="text-gray-500 text-center p-4"
+                    >
+                        Upload or take a photo (PNG or JPG)
+                    </p>
+                </div>
+
+                <!-- Status and Message Area -->
+                <div id="status-message" class="text-center h-10 mb-6">
+                    <p
+                        id="message-text"
+                        class="text-lg font-medium text-gray-700"
+                    ></p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div id="input-area" class="flex flex-col space-y-4">
+                    <!-- File Input (Hidden) -->
+                    <input
+                        type="file"
+                        id="file-input"
+                        class="hidden-file-input"
+                        accept="image/png, image/jpeg"
+                        onchange="handleFileSelect(event)"
+                    />
+
+                    <!-- Trigger Buttons for Upload/Camera -->
+                    <div class="flex space-x-4">
+                        <button
+                            onclick="document.getElementById('file-input').removeAttribute('capture'); document.getElementById('file-input').click();"
+                            id="upload-btn"
+                            class="flex-1 px-4 py-3 bg-primary-blue text-white rounded-lg font-semibold shadow-md hover:bg-blue-700 transition duration-150 active:scale-[0.98]"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 inline mr-2"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                            >
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M3 17a1 1 0 011-1h12a1 1 0 011 1v1a1 1 0 01-1 1H4a1 1 0 01-1-1v-1zm12.707-10.707a1 1 0 00-1.414 0l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L13.414 11H17a1 1 0 100-2h-3.586l1.293-1.293a1 1 0 000-1.414zM10 3a1 1 0 011 1v5a1 1 0 11-2 0V4a1 1 0 011-1z"
+                                    clip-rule="evenodd"
+                                />
+                            </svg>
+                            Upload Photo
+                        </button>
+
+                        <button
+                            onclick="document.getElementById('file-input').setAttribute('capture', 'user'); document.getElementById('file-input').click();"
+                            id="camera-btn"
+                            class="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg font-semibold shadow-md hover:bg-gray-700 transition duration-150 active:scale-[0.98]"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 inline mr-2"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                            >
+                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                    clip-rule="evenodd"
+                                />
+                            </svg>
+                            Take Photo
+                        </button>
+                    </div>
+
+                    <!-- Send/Verify Button -->
+                    <button
+                        onclick="sendImage()"
+                        id="send-btn"
+                        class="w-full px-4 py-3 bg-green-500 text-white rounded-lg font-bold shadow-xl shadow-green-200/50 hover:bg-green-600 transition duration-150 active:scale-[0.98] disabled:bg-gray-400 disabled:shadow-none mt-4"
+                        disabled
+                    >
+                        Send for Verification
+                    </button>
+                </div>
+
+                <!-- Try Again Button (Hidden initially) -->
+                <button
+                    onclick="resetApp()"
+                    id="retry-btn"
+                    class="hidden w-full px-4 py-3 bg-yellow-500 text-white rounded-lg font-bold shadow-xl shadow-yellow-200/50 hover:bg-yellow-600 transition duration-150 active:scale-[0.98] mt-4"
+                >
+                    Try Again
+                </button>
+            </div>
+        </div>
+
+        <script src="script.js"></script>
+    </body>
+</html>

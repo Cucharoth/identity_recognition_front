@@ -1,0 +1,11 @@
+services:
+  web:
+    build: .
+    ports:
+      - "33002:80"
+    networks:
+      - identity-recognition-network
+
+networks:
+  identity-recognition-network:
+    external: true

@@ -1,7 +1,7 @@
 // --- Globals and Setup ---
 
 // This is the URL your actual backend API would live at
-const API_URL = "http://localhost:33001/verify";
+const API_URL = "http://backend:33001/verify";
 let selectedFile = null;
 let isSending = false;
 

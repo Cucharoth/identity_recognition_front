@@ -1,6 +1,7 @@
 services:
   web:
     build: .
+    container_name: identity-recognition-web
     ports:
       - "33002:80"
     networks:
